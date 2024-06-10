@@ -1,0 +1,38 @@
+- name: Configurar la infra 
+  hosts: all
+  roles:
+    - nginx
+    - web
+  tasks:
+    - name: Instalar Docker
+      become: yes
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Detener y eliminar contenedores existentes si es necesario
+      shell: docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
+      ignore_errors: yes
+
+    - name: Crear y Ejecutar Contenedor para Nginx
+      docker_container:
+        name: nginx-container
+        image: nginx:latest
+        state: started
+
+    - name: Crea conternedor 1
+      docker_container:
+        name: web1-container
+        image: web1:latest
+        state: started
+        ports:
+#          - "8081:80"
+          - ":80"
+
+    - name: Crea Contenedor 2
+      docker_container:
+        name: web2-container
+        image: web2:latest
+        state: started
+        ports:
+#          - ":80"

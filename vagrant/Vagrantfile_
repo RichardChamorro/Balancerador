@@ -1,0 +1,43 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.define "web1" do |web1|
+    web1.vm.provider "docker" do |docker|
+      docker.image = "apache"
+      docker.name = "web1-container"
+      docker.ports = ["8082:80"]
+      docker.remains_running = false
+      docker.volumes = ["/root/Richard/DespliegueAnsible/vagrant/html:/usr/share/nginx/html"]
+    end
+  end
+
+  config.vm.define "web2" do |web2|
+    web2.vm.provider "docker" do |docker|
+      docker.build_dir = "/root/Richard/DespliegueAnsible/vagrant"
+      docker.image = "apache"
+      docker.name = "web2-container"
+      docker.dockerfile = "Dockerfile"
+      docker.ports = ["8083:80"]
+      docker.remains_running = false
+      docker.volumes = ["/root/Richard/DespliegueAnsible/vagrant/html2:/usr/share/nginx/html"]
+    end
+  end
+
+  config.vm.define "nginx" do |nginx|
+    nginx.vm.provider "docker" do |docker|
+      docker.build_dir = "/root/Richard/DespliegueAnsible/vagrant"
+#      docker.image = "nginx:latest"
+#      docker.name = "nginx-container"
+      docker.dockerfile = "DockerfileNginx"
+      docker.ports = ["8084:80"]
+      docker.remains_running = true
+      docker.volumes = ["/root/Richard/DespliegueAnsible/vagrant/nginx.conf:/etc/nginx/nginx.conf"]
+#      docker.links = ["web1", "web2"]
+    end
+  end
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "/root/Richard/DespliegueAnsible/vagrant/playbook.yml"
+    ansible.inventory_path = "/root/Richard/DespliegueAnsible/vagrant/inventario.ini"
+    ansible.limit = "nginx"
+  end
+end

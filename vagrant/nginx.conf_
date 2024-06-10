@@ -1,0 +1,18 @@
+events {
+    worker_connections 10;  # Número máximo de conexiones simultáneas que cada worker puede manejar
+}
+ http {
+     upstream backend {
+
+         server 139.177.204.53:8082;
+         server 139.177.204.53:8083;
+      }
+
+      server {
+         listen 80;
+          location / {
+               proxy_pass http://backend;
+          } 
+      }
+
+}

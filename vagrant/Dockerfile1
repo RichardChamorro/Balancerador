@@ -1,0 +1,12 @@
+FROM php:8.3.7-apache
+USER root
+
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=paginaweb
+ENV MYSQL_USER=richard
+ENV MYSQL_PASSWORD=root
+
+#RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli && apachectl restart
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+
+COPY ./index1.php /var/www/html

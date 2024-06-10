@@ -1,0 +1,75 @@
+Vagrant.configure("2") do |config|
+  
+  if `docker network ls`.include?("vagrant") 
+      puts "La red vagrant ya existe."
+  else
+    puts "Creando la red vagrant"
+    `docker network create vagrant`
+   end
+
+  config.vm.define "nginx" do |nginx|
+    nginx.vm.provider "docker" do |docker|
+      docker.build_dir = "/root/Richard/DespliegueAnsible/vagrant"
+      docker.dockerfile = "DockerfileNginx"
+      docker.remains_running = false
+      docker.create_args = [
+        "--network", "vagrant",
+        "--restart", "always",
+        "--name", "nginx"]
+      docker.ports = ["8080:80"]
+      end
+    end
+
+  config.vm.define "index1" do |index1|
+    index1.vm.provider "docker" do |docker|
+      docker.image = "html:1.0.0"
+#      docker.build_dir = "/root/Richard/DespliegueAnsible/vagrant"
+#      docker.dockerfile = "Dockerfile1"
+      docker.name = "web1-container"
+      docker.remains_running = false
+      docker.create_args = [
+        "--network", "vagrant",
+        "--restart", "always",
+        "--name", "index1"]
+      docker.ports = ["8081:80"]
+      docker.volumes = ["/root/Richard/DespliegueAnsible/vagrant/html:/var/www/html"]
+      end
+    end
+
+  config.vm.define "index2" do |index2|
+    index2.vm.provider "docker" do |docker|
+      docker.image = "html:1.0.0"
+#      docker.build_dir = "/root/Richard/DespliegueAnsible/vagrant"
+#      docker.dockerfile = "Dockerfile2"
+      docker.name = "web2-container"
+      docker.remains_running = false
+      docker.create_args = [
+        "--network", "vagrant",
+        "--restart", "always",
+        "--name", "index2"]
+      docker.ports = ["8082:80"]
+      docker.volumes = ["/root/Richard/DespliegueAnsible/vagrant/html2:/var/www/html"]
+       end
+     end
+
+   config.vm.define "mysql" do |mysql|
+     mysql.vm.provider "docker" do |docker|
+#      docker.image = "mysql:latest"
+      docker.build_dir = "/root/Richard/DespliegueAnsible/vagrant"
+      docker.dockerfile = "Dockerfilemysql"
+      docker.ports = ["3306:3306"]
+      docker.name = "mysql"
+      docker.env = {
+        MYSQL_ROOT_PASSWORD: "root",
+        MYSQL_DATABASE: "paginaweb",
+        MYSQL_USER: "richard",
+        MYSQL_PASSWORD: "root"
+        }
+      docker.create_args = [
+        "--network", "vagrant",
+        "--restart", "always",
+        "--name", "mysql"]
+#      docker.volumes = ["/root/Richard/DespliegueAnsible/vagrant/BD:/docker-entrypoint-initdb.d/init.sql:ro"]
+     end
+   end
+end
